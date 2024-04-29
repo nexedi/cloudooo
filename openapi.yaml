@@ -1,0 +1,435 @@
+openapi: 3.0.0
+info:
+  description: |
+    Cloudooo 
+    Document conversion server.
+  version: "1.0.0"
+  title: Cloudooo
+  contact:
+    name: Nexedi
+    url: 'https://cloudooo.nexedi.com/'
+  license:
+    name: GPLv3
+    url: 'https://www.gnu.org/licenses/gpl-3.0.en.html'
+servers:
+# Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/perrinjerome/cloudooo/1.0.0
+  - url: 'https://cloudooo.erp5.net'
+tags:
+  - name: File
+    description: Files management
+  - name: Conversions
+    description: Conversions management
+  - name: One-shot Synchronous File Operations
+    description: Synchronous file operations happening in "one shot", ie. the file to convert is uploaded in the request and the response
+  - name: Synchronous File Operations
+    description: Synchronous file operations on a file that was previously uploaded
+  - name: Asynchronous File Operations
+    description: Asynchronous file conversion and metadata extractions
+  
+paths:
+  /convertFile:
+    post:
+      deprecated: true
+      # tag is too long !
+      tags:
+        - One-shot Synchronous File Operations
+        - deprecated
+      summary: Upload a file and convert it to target format
+      operationId: directConvertFile
+      responses:
+        "200":
+          description: conversion successful
+          content:
+            "application/xmlrpc+xml":
+              schema:
+                $ref: '#/components/schemas/XMLRPCConvertFileResponse'
+                  
+  /getTargetFormatMimeTypeItemList:
+    get:
+      deprecated: true
+      tags:
+        - deprecated
+      summary: getTargetFormatMimeTypeItemList
+      responses:
+        "200":
+          description: successful operation
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TargetFormat'
+
+  /file:
+    put:
+      tags:
+        - File
+      summary: Upload a file for asynchronous operations
+      description: |
+        This file will be uploaded and valid for a limited amount of time.
+
+        HAL Links:
+          * getFile
+          * convertFile
+          * getFileMetadata
+      operationId: addFile
+      responses:
+        '200':
+          description: File was succesfully uploaded
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/File'
+      requestBody:
+        $ref: '#/components/requestBodies/UploadDocument'
+
+  '/file/{id}':
+    get:
+      tags:
+        - File
+      summary: Access a file by ID
+      description: |
+        HAL Links:
+          * convertFile
+          * getFileMetadata
+          * deleteFile
+      operationId: getFile
+      parameters:
+        - name: id
+          in: path
+          description: ID of an already uploaded file
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
+        '404':
+          description: 'The document was not found'
+        '410':
+          # XXX needed ?
+          description: 'The document has expired'
+    delete:
+      tags:
+        - File
+      summary: Delete a file
+      operationId: deleteFile
+      parameters:
+        - name: id
+          in: path
+          description: ID of an already uploaded file
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: deletion was successful
+        '404':
+          description: 'The document was not found'
+
+
+  '/file/{id}/conversion_targets':
+    get:
+      tags:
+        - File
+        - Synchronous File Operations
+      summary: Get the possible target formats.
+      description:
+        HAL Links
+         * convert
+         * file
+      operationId: getAllowedTargetFormats
+      parameters:
+        - name: id
+          in: path
+          description: ID of an already uploaded file
+          required: true
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: metadata data extraction was successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TargetFormat'
+
+  '/file/{id}/convert/wait':
+    get:
+      tags:
+        - File
+        - Synchronous File Operations
+      summary: Get the file converted in another format
+      description: Synchronously convert the file in given format and 
+      operationId: convertFile
+      parameters:
+        - name: id
+          in: path
+          description: ID of an already uploaded file
+          required: true
+          schema:
+            type: string
+        - name: target_mime_type
+          in: query
+          description: Target mime type to convert to, in mime type format
+          example: application/pdf
+          schema:
+            type: string
+        - name: target_format_id
+          in: query
+          description: ID of the target format to convert to
+          schema:
+            type: string
+        - name: conversion_kw
+          in: query
+          description: Conversion Parameters
+          schema:
+            # XXX or string which is json encoded ?
+            type: object
+      responses:
+        '200':
+          description: conversion was successful
+          content:
+            "*/*":
+              schema:
+                description: Converted file body
+
+  '/file/{id}/convert':
+    get:
+      tags:
+        - File
+      summary: Start an asynchronous conversion of file to another format
+      description: |
+        HAL Links:
+          * deleteConversion
+          * getConversionResult
+          * getConversion
+      operationId: startConversion
+      parameters:
+        - name: id
+          in: path
+          description: ID of an already uploaded file
+          required: true
+          schema:
+            type: string
+        - name: target_mime_type
+          in: query
+          description: Target mime type to convert to, in mime type format
+          example: application/pdf
+          schema:
+            type: string
+        - name: target_mime_type_id
+          in: query
+          description: ID of the target format to convert to
+          schema:
+            type: string
+        - name: conversion_kw
+          in: query
+          description: Conversion Parameters
+          schema:
+            # XXX or string which is json encoded ?
+            type: object
+      responses:
+        '202':
+          description: conversion started
+
+  "/conversion/wait":
+    post:
+      tags:
+        - Conversions
+      summary: Synchronously convert a file
+      responses:
+        '200':
+          description: conversion was succesful
+        '500':
+          description: conversion failed
+
+  /conversion:
+    put:
+      tags:
+        - Conversions
+      summary: Upload a file and start a conversion for this file
+      description: |
+        HAL Links:
+          * getFile
+          * deleteConversion
+          * getConversionResult
+      responses:
+        '202':
+          description: conversion started
+
+  '/conversion/{id}':
+    head:
+      tags:
+        - Conversions
+      summary: Query the conversion status
+      description: |
+        HAL Links:
+          * getFile
+          * deleteConversion
+          * getConversionResult
+      operationId: getConversionStatus
+      parameters:
+        - name: id
+          in: path
+          description: ID of a started conversion
+          required: true
+          schema:
+            type: string
+      responses:
+        '100':
+          description: conversion is not finished yet
+        '200':
+          description: conversion is finished
+        '404':
+          description: conversion does not exist
+        '410':
+          description: conversion is expired
+        '500':
+          description: conversion failed
+    get:
+      tags:
+        - Conversions
+      summary: Get the conversion result
+      description: |
+        HAL Links:
+          * deleteConversion
+          * getConversion
+      operationId: getConversionResult
+      parameters:
+        - name: id
+          in: path
+          description: ID of a started conversion
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: conversion is finished
+          content:
+            "*/*":
+              example: converted file
+        '421':
+          description: conversion is not finished
+        '404':
+          description: conversion does not exist
+        '410':
+          description: conversion is expired
+        '500':
+          description: conversion failed
+    delete:
+      tags:
+        - Conversions
+      summary: Delete a conversion
+      operationId: deleteConversion
+      parameters:
+        - name: id
+          in: path
+          description: ID of a started conversion
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: conversion has been cancelled
+        '404':
+          description: conversion does not exist
+        '410':
+          description: conversion is expired
+
+
+components:
+  schemas:
+    XMLRPCConvertFileResponse:
+      type: object
+      properties:
+        0:
+          type: string
+          description: content-type
+          example: "application/pdf"
+        1:
+          type: string
+          description: body
+          example: "base64-encoded converted file"
+    File:
+      type: object
+      properties:
+        id:
+          type: string
+        content-type:
+          type: string
+        filename:
+          type: string
+    FileMetadata:
+      example: 
+        creationDate: "2019-01-01"
+        author: "John Doe"
+        generator: "X software"
+      type: object
+      additionalProperties: true
+    TargetFormat:
+      example:
+        id: pdf
+        mime-type: application/pdf
+        name: Portable Document Format (PDF)
+        conversion_kw_schema:
+          color:
+            type: string
+            enum:
+              - color
+              - black and white
+              - grayscale
+            description: The color scheme to use
+          table_of_content:
+            type: boolean
+            description: Generates a table of contents
+            default: false
+      type: object
+      properties:
+        id:
+          type: string
+        mime-type:
+          type: string
+        name:
+          type: string
+        conversion_kw_schema:
+          type: object
+          additionalProperties: true
+          example: a json schema describing the allowed conversion arget
+      xml:
+        name: TargetFormat
+  requestBodies:
+    UploadDocument:
+      description: An uploaded document. The content-type in the request, if not */* will be used as for input format. XXX is it really good idea ?
+      content:
+        "*/*":
+          example: Input file
+          schema:
+            type: string
+            format: binary
+    Base64UploadDocument:
+      description: Maybe ?
+      content:
+        "*/*":
+          example: Input file
+          schema:
+            type: string
+            format: binary
+    Document:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/File'
+      description: Document to be uploaaded.
+      required: true
