@@ -37,12 +37,12 @@ class IManager(Interface):
   """Provides public method to communicate with Cloudooo clients
   """
 
-  def convertFile(content, source_mimetype, destination_mimetype, **kw):
+  def convertFile(content, source_format, destination_format, **kw):
     """Returns the converted file in the given format.
 
     content : binary data to convert
-    source_mimetype : mimetype of given content
-    destination_mimetype : expected output conversion mimetype
+    source_format : input format (extension without '.')
+    destination_format : output conversion format (extension without '.')
 
     **kw holds specific parameters for the conversion
     """
@@ -63,17 +63,17 @@ class IManager(Interface):
     **kw holds specific parameters for the conversion
     """
 
-  def getFileMetadataItemList(content, source_mimetype):
+  def getFileMetadataItemList(content, source_format):
     """Returns a list key, value pairs representing the
     metadata values for the document. The structure of this
     list is "unpredictable" and follows the convention of each file.
 
     content : binary data where to reads metadata
-    source_mimetype : mimetype of given content
+    source_format : input format (extension without '.')
     """
 
-  def convertFileAndGetMetadataItemList(content, source_mimetype,
-                                            destination_mimetype, **kw):
+  def convertFileAndGetMetadataItemList(content, source_format,
+                                        destination_format, **kw):
     """returns a converted version of provided content plus a
     dictionary of extracted metadata.
     signature of method is same as convertFile
@@ -82,12 +82,12 @@ class IManager(Interface):
     'metadata' entries.
     """
 
-  def updateFileMetadata(content, source_mimetype, metadata_dict):
+  def updateFileMetadata(content, source_format, metadata_dict):
     """Updates the content with provided metadata and
     return the new file.
 
     content : binary data to convert
-    source_mimetype : mimetype of given content
+    source_format : input format (extension without '.')
     metadata_dict : Metadatas to include in content
     """
 

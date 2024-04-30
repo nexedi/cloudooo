@@ -136,8 +136,8 @@ class Manager(object):
     #     use the conversion_kw in a possible interoperable way between all
     #     "html to pdf" handlers.
     if (conversion_kw and
-        source_format in ("html", "text/html") and
-        destination_format in ("pdf", "application/pdf")):
+        source_format in ("htm", "html") and
+        destination_format == "pdf"):
       handler_class = WkhtmltopdfHandler
     else:
       handler_class = getHandlerClass(source_format,

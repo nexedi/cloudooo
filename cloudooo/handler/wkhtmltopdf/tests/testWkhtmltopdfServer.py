@@ -37,6 +37,7 @@ class TestServer(TestCase):
     return [
       (join('data', 'test_with_png_dataurl.html'), "html", "pdf", "application/pdf"),
       (join('data', 'test_with_script.html'), "html", "pdf", "application/pdf"),
+      (join('data', 'test_with_script.html'), "htm", "pdf", "application/pdf"),
     ]
 
   def testConvertHtmltoPdf(self):
