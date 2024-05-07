@@ -31,6 +31,7 @@
 import json
 import pkg_resources
 import mimetypes
+import time
 from base64 import decodebytes, encodebytes
 from os import environ, path
 from subprocess import Popen, PIPE
@@ -177,7 +178,17 @@ class Handler:
     """
     if not self.enable_scripting and kw.get('script'):
       raise Exception("ooo: scripting is disabled")
-    logger.debug("OooConvert: %s > %s", self.source_format, destination_format)
+    content = self.document.getContent()
+    document_url = self.document.getUrl()
+    start_time = time.time()
+    logger.debug(
+      "OooConvert: source_format=%s destination_format=%s kw=%s size=%s document_url=%s",
+      self.source_format,
+      destination_format,
+      kw,
+      len(content),
+      document_url,
+    )
     kw['source_format'] = self.source_format
     if destination_format:
       kw['destination_format'] = destination_format
@@ -193,6 +204,7 @@ class Handler:
     self.document.reload(url)
     content = self.document.getContent(self.zip)
     self.document.trash()
+    logger.debug('finished conversion document_url=%s elapsed=%s', document_url, time.time()-start_time)
     return content
 
   def getMetadata(self, base_document=False):

@@ -60,7 +60,7 @@ def loadMimetypeList():
   mimetypes.init(files=[mime_types_url, ])
 
 
-def configureLogger(level=None, debug_mode=False):
+def configureLogger(level=None, debug_mode=False, logfile=None):
   """Configure logger.
   Keyword arguments:
   level -- Level to prints the log messages
@@ -82,7 +82,10 @@ def configureLogger(level=None, debug_mode=False):
   logger.propagate = 0
   logger.setLevel(level)
   # create console handler and set level to debug
-  ch = logging.StreamHandler()
+  if logfile:
+    ch = logging.FileHandler(logfile)
+  else:
+    ch = logging.StreamHandler()
   ch.setLevel(level)
   # create formatter
   format = "%(asctime).19s - %(name)s - %(levelname)s - %(message)s"
