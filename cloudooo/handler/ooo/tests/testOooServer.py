@@ -52,7 +52,7 @@ class TestAllowedExtensions(TestCase):
     text_allowed_list = self.proxy.getAllowedExtensionList(text_request)
     # XXX slightly different allowed formats with document_type !?
     _text_expected_tuple = text_expected_tuple + (
-      ('docm', 'Word 2007–365 VBA'),
+      ('docm', 'Word 2007 VBA'),
     )
     self.assertEqual(
       sorted([tuple(x) for x in text_allowed_list]),

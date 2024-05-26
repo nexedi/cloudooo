@@ -186,10 +186,8 @@ class UnoDocument:
 
     return args
 
-  def _load(self, infilter, refresh):
+  def _load(self, infilter):
     """Create one document with basic properties
-    refresh argument tells to uno environment to
-    replace dynamic properties of document before conversion
     """
     createInstance = self.service_manager.createInstance
     self.desktop = createInstance("com.sun.star.frame.Desktop")
@@ -231,15 +229,6 @@ class UnoDocument:
         parser = CustomHTMLParser()
         with open(temp_file.name, 'r') as f:
           parser.feed(f.read())
-    if refresh:
-      # Before converting to expected format, refresh dynamic
-      # value inside document.
-      dispatch = partial(
-        createInstance("com.sun.star.frame.DispatchHelper").executeDispatch,
-        uno_document.CurrentController.Frame)
-      for uno_command in ('UpdateFields', 'UpdateAll', 'UpdateInputFields',
-                          'UpdateAllLinks', 'UpdateCharts',):
-        dispatch('.uno:%s' % uno_command, '', 0, ())
     module_manager = createInstance("com.sun.star.frame.ModuleManager")
     self.document_type = module_manager.identify(uno_document)
 
@@ -363,7 +352,7 @@ def main():
       "uno_path=", "office_binary_path=",
       "hostname=", "port=", "source_format=",
       "document_url=", "destination_format=",
-      "mimemapper=", "metadata=", "refresh=",
+      "mimemapper=", "metadata=",
       "unomimemapper_bin=", "infilter=", "script="])
   except GetoptError as msg:
     msg = msg.msg + help_msg
@@ -376,7 +365,7 @@ def main():
 
   metadata = mimemapper = script = None
   hostname = port = office_binary_path = uno_path = None
-  document_url = destination_format = source_format = infilter = refresh = None
+  document_url = destination_format = source_format = infilter = None
   for opt, arg in iter(opt_list):
     if opt in ('-h', '--help'):
       help()
@@ -394,8 +383,6 @@ def main():
       destination_format = arg
     elif opt == '--source_format':
       source_format = arg
-    elif opt == '--refresh':
-      refresh = json.loads(arg)
     elif opt == '--metadata':
       arg = b64decode(arg).decode('utf-8')
       metadata = json.loads(arg)
@@ -409,7 +396,7 @@ def main():
   service_manager = helper_util.getServiceManager(
     hostname, port, uno_path, office_binary_path)
   unodocument = UnoDocument(service_manager, document_url,
-    source_format, destination_format, infilter, refresh)
+    source_format, destination_format, infilter)
   if script:
     unodocument.runScript(script)
   if '--setmetadata' in param_list:
@@ -421,7 +408,7 @@ def main():
       if output:
         # Instanciate new UnoDocument instance with new url
         unodocument = UnoDocument(service_manager, output,
-          destination_format or source_format, None, None, refresh)
+          destination_format or source_format, None, None)
       metadata_dict = unodocument.getMetadata()
       if output:
         metadata_dict['document_url'] = output

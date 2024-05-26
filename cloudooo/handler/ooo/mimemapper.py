@@ -94,7 +94,7 @@ class MimeMapper:
       'Microsoft PowerPoint 2007-2013 XML':'ms.pptx',
       'Microsoft Word 2007 XML':'ms.docx',
       'Microsoft Word 2007-2013 XML':'ms.docx',
-      'Word 2007–365':'ms.docx',
+      'Word 2007':'ms.docx',
       'Microsoft Word 6.0':'6.doc',
       'Microsoft Word 95':'95.doc',
       'TIFF - Tagged Image File Format': 'tiff',

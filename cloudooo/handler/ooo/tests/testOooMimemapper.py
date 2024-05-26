@@ -36,12 +36,12 @@ from cloudooo.handler.ooo.mimemapper import MimeMapper
 # extension/document_type, the returned mime types are different for text
 text_expected_tuple = (
     ('doc', 'Word 97–2003'),
-    ('docx', 'Office Open XML Text (Transitional)'),
+    ('docx', 'Word 2010–365 Document'),
     ('epub', 'EPUB Document'),
     ('fodt', 'Flat XML ODF Text Document'),
     ('html', 'HTML Document (Writer)'),
     ('jpg', 'JPEG - Joint Photographic Experts Group'),
-    ('ms.docx', 'Word 2007–365'),
+    ('ms.docx', 'Word 2007'),
     ('odt', 'ODF Text Document'),
     ('pdf', 'PDF - Portable Document Format'),
     ('png', 'PNG - Portable Network Graphics'),
@@ -50,13 +50,14 @@ text_expected_tuple = (
     ('webp', 'WEBP - WebP Image'),
     )
 extra_text_expected_tuple = (
-    ('docm', 'Word 2007–365 VBA'),
+    ('docm', 'Word 2007 VBA'),
     )
 
 global_expected_tuple = (
     )
 
 drawing_expected_tuple = (
+    ('apng', 'APNG - Animated Portable Network Graphics'),
     ('bmp', 'BMP - Windows Bitmap'),
     ('emf', 'EMF - Enhanced Metafile'),
     ('emz', 'EMZ - Compressed Enhanced Metafile'),
